@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:texol_chat_app/core/theme/app_pallete.dart';
 import 'package:texol_chat_app/core/widgets/custom_field.dart';
+import 'package:texol_chat_app/features/auth/view_model/auth_view_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -60,21 +62,55 @@ class LoginScreenState extends State<LoginScreen> {
                   ),
                   borderRadius: BorderRadius.circular(7),
                 ),
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    fixedSize: const Size(395, 55),
-                    backgroundColor: Pallete.transparentColor,
-                    shadowColor: Pallete.transparentColor,
-                  ),
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                child: Selector<AuthViewModel, bool>(
+                  selector: (p0, p1) => p1.isLoading,
+                  builder: (context, isLoading, _) {
+                    return ElevatedButton(
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              final authViewModel =
+                                  context.read<AuthViewModel>();
+                              await authViewModel.login(
+                                _usernameController.text.trim(),
+                                _passwordController.text.trim(),
+                              );
+                            },
+                      style: ElevatedButton.styleFrom(
+                        fixedSize: const Size(395, 55),
+                        backgroundColor: Pallete.transparentColor,
+                        shadowColor: Pallete.transparentColor,
+                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 16,
+                              width: 16,
+                              child: CircularProgressIndicator(),
+                            )
+                          : const Text(
+                              "Login",
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                    );
+                  },
                 ),
+              ),
+              const SizedBox(height: 15),
+              Selector<AuthViewModel, String>(
+                selector: (p0, p1) => p1.errorMessage,
+                builder: (context, value, child) {
+                  return Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Pallete.errorColor,
+                    ),
+                  );
+                },
               )
             ],
           ),
