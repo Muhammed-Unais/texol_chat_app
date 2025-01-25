@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:texol_chat_app/core/theme/app_pallete.dart';
 import 'package:texol_chat_app/features/chat/model/charging_status_model.dart';
+import 'package:texol_chat_app/features/chat/model/message_model.dart';
+import 'package:texol_chat_app/features/chat/view/widget/text_message_card.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -38,6 +40,29 @@ class _ChatScreenState extends State<ChatScreen> {
       status: "Pending",
       backgroundColor: Colors.yellow.shade100,
       labelColor: Colors.yellow.shade800,
+    ),
+  ];
+
+  final List<Message> messages = [
+    Message(
+      text: "Hello!",
+      sender: "me",
+      timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
+    ),
+    Message(
+      text: "How are you?",
+      sender: "me",
+      timestamp: DateTime.now().subtract(const Duration(minutes: 9)),
+    ),
+    Message(
+      text: "I'm good, thank you!",
+      sender: "other",
+      timestamp: DateTime.now().subtract(const Duration(minutes: 7)),
+    ),
+    Message(
+      text: "What about you?",
+      sender: "other",
+      timestamp: DateTime.now().subtract(const Duration(minutes: 6)),
     ),
   ];
 
@@ -100,7 +125,19 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           _messageStatus(),
-          const Expanded(child: SizedBox()),
+          Expanded(
+            child: ListView.builder(
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final message = messages[index];
+                return MessageCard(
+                  text: message.text,
+                  sender: message.sender,
+                  timestamp: message.timestamp,
+                );
+              },
+            ),
+          ),
           _bottomChatField(),
           if (isMessageNotEmpty) ...[
             const SizedBox(height: 5),
