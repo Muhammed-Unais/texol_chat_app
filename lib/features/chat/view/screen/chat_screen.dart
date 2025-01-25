@@ -12,6 +12,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   int currentTabIndex = 0;
   final TextEditingController _textController = TextEditingController();
+  bool isMessageNotEmpty = false;
   final List<ChargingStatusModel> tabs = [
     ChargingStatusModel(
       status: "All",
@@ -101,6 +102,72 @@ class _ChatScreenState extends State<ChatScreen> {
           _messageStatus(),
           const Expanded(child: SizedBox()),
           _bottomChatField(),
+          if (isMessageNotEmpty) ...[
+            const SizedBox(height: 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 10,
+                    horizontal: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(.1),
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.send_outlined,
+                        color: Colors.blue,
+                        size: 18,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Send as chat',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.blue,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 12,
+                    horizontal: 16,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(.1),
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(
+                        Icons.blinds_closed,
+                        color: Colors.green,
+                        size: 18,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Send as chat',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.green,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 5),
+          ],
         ],
       ),
     );
@@ -108,7 +175,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Padding _bottomChatField() {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
@@ -163,6 +230,15 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                     ),
                     child: TextField(
+                      onChanged: (value) {
+                        if (value.isEmpty) {
+                          isMessageNotEmpty = false;
+                        } else {
+                          isMessageNotEmpty = true;
+                        }
+
+                        setState(() {});
+                      },
                       controller: _textController,
                       decoration: const InputDecoration(
                         hintText: 'Type here...',

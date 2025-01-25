@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:texol_chat_app/core/theme/app_theme.dart';
 import 'package:texol_chat_app/features/auth/view/screens/login_screen.dart';
 import 'package:texol_chat_app/features/auth/view_model/auth_view_model.dart';
-import 'package:texol_chat_app/features/chat/screen/chat_screen.dart';
+import 'package:texol_chat_app/features/chat/view/screen/chat_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
