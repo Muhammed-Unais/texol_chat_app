@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:texol_chat_app/core/theme/app_pallete.dart';
 import 'package:texol_chat_app/core/widgets/custom_field.dart';
 import 'package:texol_chat_app/features/auth/view_model/auth_view_model.dart';
+import 'package:texol_chat_app/features/chat/screen/chat_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -75,6 +76,16 @@ class LoginScreenState extends State<LoginScreen> {
                                 _usernameController.text.trim(),
                                 _passwordController.text.trim(),
                               );
+
+                              if (authViewModel.isLoggedIn && context.mounted) {
+                                _passwordController.clear();
+                                _usernameController.clear();
+                                Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) {
+                                    return const ChatScreen();
+                                  },
+                                ));
+                              }
                             },
                       style: ElevatedButton.styleFrom(
                         fixedSize: const Size(395, 55),
