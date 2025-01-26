@@ -8,6 +8,7 @@ class MessageModel {
   final String status;
   final String content;
   final String? duration;
+  final String? fileName;
 
   MessageModel({
     required this.id,
@@ -16,6 +17,7 @@ class MessageModel {
     required this.messageTyoe,
     required this.status,
     required this.content,
+    this.fileName,
     this.duration,
   });
   @override

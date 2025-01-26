@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 import 'package:audio_waveforms/audio_waveforms.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -16,11 +17,17 @@ class ChatViewModel extends ChangeNotifier {
   late final RecorderController _recorderController;
   String currentFilter = 'All';
   late Directory _appDirectory;
+  String? _filePath;
+  MessageType? _fileType;
+  String? _fileName;
 
   List<MessageModel> get messages => _messages;
   bool get isVoiceRecording => _isVoiceRecording;
   bool get isVoiceInitiated => _isVoiceInitiated;
   bool get isTexting => _isTexting;
+  String? get filePath => _filePath;
+  String? get fileName => _fileName;
+  MessageType? get fileType => _fileType;
   RecorderController get recorderController => _recorderController;
   TextEditingController get textController => _textController;
   List<MessageModel> get filteredMessages {
@@ -113,6 +120,65 @@ class ChatViewModel extends ChangeNotifier {
       ),
     );
     _messages = [voiceMessage, ..._messages];
+    notifyListeners();
+  }
+
+  Future<void> filePick() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+    );
+
+    if (result != null && result.files.single.path != null) {
+      String path = result.files.single.path!;
+      String fileName = result.files.single.name;
+      String extension = fileName.split('.').last.toLowerCase();
+
+      String fileType;
+      if (['jpg', 'jpeg', 'png'].contains(extension)) {
+        fileType = 'image';
+      } else if (extension == 'pdf') {
+        fileType = 'pdf';
+      } else {
+        fileType = 'file';
+      }
+
+      final fileExtType =
+          fileType == 'image' ? MessageType.image : MessageType.file;
+
+      _filePath = path;
+      _fileType = fileExtType;
+      _fileName = fileName;
+
+      notifyListeners();
+    } else {
+      log("File selection canceled.");
+    }
+  }
+
+  void deletefile() {
+    _fileName = null;
+    _filePath = null;
+    _fileType = null;
+    notifyListeners();
+  }
+
+  void sendFile() async {
+    if (_filePath == null) return;
+    final fileMessage = MessageModel(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      content: _filePath!,
+      messageTyoe: fileType!,
+      status: 'Unread',
+      timestamp: DateTime.now(),
+      sender: "me",
+      fileName: fileName,
+    );
+
+    _messages = [fileMessage, ..._messages];
+    _fileName = null;
+    _filePath = null;
+    _fileType = null;
     notifyListeners();
   }
 

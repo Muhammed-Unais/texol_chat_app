@@ -114,10 +114,11 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           const BottomChatInput(),
           const SizedBox(height: 5),
-          Selector<ChatViewModel, (bool, bool)>(
-            selector: (p0, p1) => (p1.isTexting, p1.isVoiceInitiated),
+          Selector<ChatViewModel, (bool, bool, String?)>(
+            selector: (p0, p1) =>
+                (p1.isTexting, p1.isVoiceInitiated, p1.fileName),
             builder: (context, value, _) {
-              if (value.$1 || value.$2) {
+              if (value.$1 || value.$2 || value.$3 != null) {
                 return _messageSendingButtons();
               }
 
@@ -142,6 +143,8 @@ class _ChatScreenState extends State<ChatScreen> {
               await chatViewModel.sendVoiceMesage();
             } else if (chatViewModel.isTexting) {
               chatViewModel.sendMessage();
+            } else if (chatViewModel.filePath != null) {
+              chatViewModel.sendFile();
             }
           },
           child: Container(

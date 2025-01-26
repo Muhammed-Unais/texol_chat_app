@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:texol_chat_app/core/enums.dart';
 import 'package:texol_chat_app/features/chat/model/message_model.dart';
+import 'package:texol_chat_app/features/chat/view/widget/file_message_card.dart';
+import 'package:texol_chat_app/features/chat/view/widget/image_message_card.dart';
 import 'package:texol_chat_app/features/chat/view/widget/text_message_card.dart';
 import 'package:texol_chat_app/features/chat/view/widget/voice_message_card.dart';
 
@@ -19,7 +21,7 @@ class MessageBubble extends StatelessWidget {
     } else if (message.messageTyoe == MessageType.voice) {
       return _buildVoiceBubble();
     } else {
-      return _buildFileBubble(message);
+      return _buildFileBubble();
     }
   }
 
@@ -32,12 +34,17 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildFileBubble(MessageModel msg) {
-    return ListTile(
-      leading: const Icon(Icons.insert_drive_file),
-      title: const Text(''),
-      subtitle: const Text('Tap to open. Status: ${"msg.status"}'),
-      onTap: () {},
+  Widget _buildFileBubble() {
+    if (message.messageTyoe == MessageType.image) {
+      return ImageMessageCard(
+        imagePath: message.content,
+        sender: message.sender,
+      );
+    }
+    return FileMessageCard(
+      filePath: message.content,
+      fileName: message.fileName ?? '',
+      sender: message.sender,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:texol_chat_app/core/enums.dart';
 import 'package:texol_chat_app/features/chat/view_model/chat_view_model.dart';
 
 class BottomChatInput extends StatefulWidget {
@@ -50,11 +51,12 @@ class _BottomChatInputState extends State<BottomChatInput> {
           vertical: 8,
           horizontal: 12,
         ),
-        child: Selector<ChatViewModel, bool>(
-          selector: (p0, p1) => p1.isVoiceInitiated,
-          builder: (context, isVoiceInitiated, _) {
-            if (!isVoiceInitiated) return _textInputField();
-            return _voiceMessageControllers();
+        child: Selector<ChatViewModel, (bool, String?, MessageType?)>(
+          selector: (p0, p1) => (p1.isVoiceInitiated, p1.fileName, p1.fileType),
+          builder: (context, values, _) {
+            if (values.$1) return _voiceMessageControllers();
+            if (values.$2 != null) return _fileField(values.$2, values.$3);
+            return _textInputField();
           },
         ),
       ),
@@ -98,10 +100,17 @@ class _BottomChatInputState extends State<BottomChatInput> {
                 child: TextField(
                   onChanged: _chatViewModel.setTextingStatus,
                   controller: _chatViewModel.textController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Type here...',
-                    suffixIcon: Icon(Icons.file_present_outlined),
-                    contentPadding: EdgeInsets.symmetric(
+                    suffixIcon: GestureDetector(
+                      onTap: () async {
+                        await _chatViewModel.filePick();
+                      },
+                      child: const Icon(
+                        Icons.file_present_outlined,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
                       vertical: 14,
                     ),
                   ),
@@ -127,6 +136,70 @@ class _BottomChatInputState extends State<BottomChatInput> {
             child: const Icon(
               Icons.mic,
               color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Row _fileField(
+    String? fileName,
+    MessageType? fileType,
+  ) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        GestureDetector(
+          onTap: _chatViewModel.filePick,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: 18,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: const BorderRadius.all(
+                Radius.circular(20),
+              ),
+            ),
+            child: Icon(
+              fileType == MessageType.file ? Icons.picture_as_pdf : Icons.image,
+              size: 40,
+              color: Colors.black,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            fileName ?? '',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+        ),
+        const SizedBox(width: 10),
+        GestureDetector(
+          onTap: _chatViewModel.deletefile,
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: 18,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(.07),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(20),
+              ),
+            ),
+            child: const Icon(
+              Icons.delete_outline_outlined,
+              color: Colors.red,
             ),
           ),
         ),
