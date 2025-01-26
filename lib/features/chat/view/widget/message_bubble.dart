@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:texol_chat_app/core/enums.dart';
 import 'package:texol_chat_app/features/chat/model/message_model.dart';
 import 'package:texol_chat_app/features/chat/view/widget/text_message_card.dart';
+import 'package:texol_chat_app/features/chat/view/widget/voice_message_card.dart';
 
 class MessageBubble extends StatelessWidget {
   final Message message;
@@ -23,17 +24,10 @@ class MessageBubble extends StatelessWidget {
   }
 
   Widget _buildVoiceBubble(Message msg) {
-    return ListTile(
-      title: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.pause),
-            onPressed: () {},
-          ),
-          const Text('Voice message - ${"msg.duration"}s'),
-        ],
-      ),
-      subtitle: Text('Recorded at ${msg.timestamp}'),
+    return VoiceMessageCard(
+      sender: message.sender,
+      duration: "0.0",
+      timestamp: message.timestamp,
     );
   }
 

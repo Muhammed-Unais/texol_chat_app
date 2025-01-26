@@ -49,7 +49,7 @@ class _ChatScreenState extends State<ChatScreen> {
       text: "Hello!",
       sender: "me",
       timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
-      messageTyoe: MessageType.text,
+      messageTyoe: MessageType.voice,
       status: 'Unread',
     ),
     Message(
