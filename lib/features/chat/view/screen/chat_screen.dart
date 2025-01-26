@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:texol_chat_app/core/enums.dart';
 import 'package:texol_chat_app/core/theme/app_pallete.dart';
 import 'package:texol_chat_app/features/chat/model/charging_status_model.dart';
 import 'package:texol_chat_app/features/chat/model/message_model.dart';
-import 'package:texol_chat_app/features/chat/view/widget/text_message_card.dart';
+import 'package:texol_chat_app/features/chat/view/widget/message_bubble.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -48,21 +49,29 @@ class _ChatScreenState extends State<ChatScreen> {
       text: "Hello!",
       sender: "me",
       timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
+      messageTyoe: MessageType.text,
+      status: 'Unread',
     ),
     Message(
       text: "How are you?",
       sender: "me",
       timestamp: DateTime.now().subtract(const Duration(minutes: 9)),
+      messageTyoe: MessageType.text,
+      status: 'Unread',
     ),
     Message(
       text: "I'm good, thank you!",
       sender: "other",
       timestamp: DateTime.now().subtract(const Duration(minutes: 7)),
+      messageTyoe: MessageType.text,
+      status: 'Unread',
     ),
     Message(
       text: "What about you?",
       sender: "other",
       timestamp: DateTime.now().subtract(const Duration(minutes: 6)),
+      messageTyoe: MessageType.text,
+      status: 'Unread',
     ),
   ];
 
@@ -130,11 +139,7 @@ class _ChatScreenState extends State<ChatScreen> {
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final message = messages[index];
-                return MessageCard(
-                  text: message.text,
-                  sender: message.sender,
-                  timestamp: message.timestamp,
-                );
+                return MessageBubble(message: message);
               },
             ),
           ),
