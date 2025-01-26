@@ -5,14 +5,14 @@ import 'package:texol_chat_app/features/chat/view/widget/text_message_card.dart'
 import 'package:texol_chat_app/features/chat/view/widget/voice_message_card.dart';
 
 class MessageBubble extends StatelessWidget {
-  final Message message;
+  final MessageModel message;
   const MessageBubble({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
     if (message.messageTyoe == MessageType.text) {
       return MessageCard(
-        text: message.text,
+        text: message.content,
         sender: message.sender,
         timestamp: message.timestamp,
       );
@@ -23,7 +23,7 @@ class MessageBubble extends StatelessWidget {
     }
   }
 
-  Widget _buildVoiceBubble(Message msg) {
+  Widget _buildVoiceBubble(MessageModel msg) {
     return VoiceMessageCard(
       sender: message.sender,
       duration: "0.0",
@@ -31,7 +31,7 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildFileBubble(Message msg) {
+  Widget _buildFileBubble(MessageModel msg) {
     return ListTile(
       leading: const Icon(Icons.insert_drive_file),
       title: const Text(''),

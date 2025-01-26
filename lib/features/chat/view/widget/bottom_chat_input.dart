@@ -1,8 +1,5 @@
-import 'dart:io';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:texol_chat_app/features/chat/view_model/chat_view_model.dart';
 
@@ -14,47 +11,18 @@ class BottomChatInput extends StatefulWidget {
 }
 
 class _BottomChatInputState extends State<BottomChatInput> {
-  late final TextEditingController _textController;
-  late final RecorderController _recorderController;
-  late ValueNotifier<bool> valueNotifier;
   late final ChatViewModel _chatViewModel;
-  late Directory _appDirectory;
-  bool _voiceMessageInitited = false;
 
   @override
   void initState() {
     super.initState();
-    _textController = TextEditingController();
-    _recorderController = RecorderController();
-    valueNotifier = ValueNotifier(_recorderController.isRecording);
     _chatViewModel = context.read<ChatViewModel>();
-    _initializeAppDirectory();
-  }
-
-  Future<void> _initializeAppDirectory() async {
-    _appDirectory = await getApplicationDocumentsDirectory();
-  }
-
-  Future<void> _startOrStopRecording() async {
-    var status = await Permission.microphone.request();
-    if (status.isGranted) {
-      if (_voiceMessageInitited) {
-        await _recorderController.stop(false);
-      } else {
-        final path =
-            '${_appDirectory.path}/recording_${DateTime.now().millisecondsSinceEpoch}.aac';
-        await _recorderController.record(path: path);
-      }
-      _voiceMessageInitited = !_voiceMessageInitited;
-      _chatViewModel.setVoiceRecordingStatus(_voiceMessageInitited);
-      valueNotifier.value = _recorderController.isRecording;
-    }
+    _chatViewModel.init();
   }
 
   @override
   void dispose() {
-    _textController.dispose();
-    _recorderController.dispose();
+    _chatViewModel.dispose();
     super.dispose();
   }
 
@@ -83,9 +51,9 @@ class _BottomChatInputState extends State<BottomChatInput> {
           horizontal: 12,
         ),
         child: Selector<ChatViewModel, bool>(
-          selector: (p0, p1) => p1.isVoiceRecording,
-          builder: (context, isVoiceRecording, _) {
-            if (!isVoiceRecording) return _textInputField();
+          selector: (p0, p1) => p1.isVoiceInitiated,
+          builder: (context, isVoiceInitiated, _) {
+            if (!isVoiceInitiated) return _textInputField();
             return _voiceMessageControllers();
           },
         ),
@@ -129,7 +97,7 @@ class _BottomChatInputState extends State<BottomChatInput> {
                 ),
                 child: TextField(
                   onChanged: _chatViewModel.setTextingStatus,
-                  controller: _textController,
+                  controller: _chatViewModel.textController,
                   decoration: const InputDecoration(
                     hintText: 'Type here...',
                     suffixIcon: Icon(Icons.file_present_outlined),
@@ -144,7 +112,7 @@ class _BottomChatInputState extends State<BottomChatInput> {
         ),
         const SizedBox(width: 10),
         GestureDetector(
-          onLongPress: _startOrStopRecording,
+          onLongPress: _chatViewModel.startOrDeleteRecording,
           child: Container(
             padding: const EdgeInsets.symmetric(
               vertical: 12,
@@ -167,8 +135,8 @@ class _BottomChatInputState extends State<BottomChatInput> {
   }
 
   Widget _voiceMessageControllers() {
-    return ValueListenableBuilder(
-      valueListenable: valueNotifier,
+    return Selector<ChatViewModel, bool>(
+      selector: (p0, p1) => p1.isVoiceRecording,
       builder: (context, isRecording, _) {
         return Row(
           children: [
@@ -194,13 +162,17 @@ class _BottomChatInputState extends State<BottomChatInput> {
                   )
                 : GestureDetector(
                     onTap: () async {
-                      if (_recorderController.isRecording) {
-                        await _recorderController.stop();
+                      final recorderController =
+                          _chatViewModel.recorderController;
+
+                      if (recorderController.isRecording) {
+                        await recorderController.pause();
                       } else {
-                        await _recorderController.record();
+                        await recorderController.record();
                       }
 
-                      valueNotifier.value = _recorderController.isRecording;
+                      _chatViewModel.setVoiceRecordingStatus(
+                          recorderController.isRecording);
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(
@@ -225,7 +197,7 @@ class _BottomChatInputState extends State<BottomChatInput> {
                 children: [
                   AudioWaveforms(
                     size: const Size(double.infinity, 35),
-                    recorderController: _recorderController,
+                    recorderController: _chatViewModel.recorderController,
                     waveStyle: const WaveStyle(
                       waveColor: Colors.red,
                       extendWaveform: true,
@@ -250,12 +222,30 @@ class _BottomChatInputState extends State<BottomChatInput> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      const Text(
-                        '01:25',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      StreamBuilder(
+                        stream:
+                            _chatViewModel.recorderController.onCurrentDuration,
+                        builder: (context, snapShot) {
+                          if (snapShot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const SizedBox();
+                          }
+
+                          double inSeconds = 0;
+                          final position = snapShot.data;
+                          if (position != null) {
+                            inSeconds =
+                                position.inSeconds - (position.inMinutes * 60);
+                          }
+
+                          return Text(
+                            "${position?.inMinutes ?? ''}:${inSeconds > 10 ? inSeconds.toInt() : "0${inSeconds.toInt()}"}",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          );
+                        },
                       )
                     ],
                   )
@@ -265,13 +255,14 @@ class _BottomChatInputState extends State<BottomChatInput> {
             if (!isRecording) ...[
               GestureDetector(
                 onTap: () async {
-                  if (_recorderController.isRecording) {
-                    await _recorderController.stop();
+                  final recorderController = _chatViewModel.recorderController;
+                  if (recorderController.isRecording) {
+                    await recorderController.pause();
                   } else {
-                    await _recorderController.record();
+                    await recorderController.record();
                   }
-
-                  valueNotifier.value = _recorderController.isRecording;
+                  _chatViewModel
+                      .setVoiceRecordingStatus(recorderController.isRecording);
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
@@ -293,7 +284,7 @@ class _BottomChatInputState extends State<BottomChatInput> {
               const SizedBox(width: 6),
             ],
             GestureDetector(
-              onTap: _startOrStopRecording,
+              onTap: _chatViewModel.startOrDeleteRecording,
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   vertical: 12,

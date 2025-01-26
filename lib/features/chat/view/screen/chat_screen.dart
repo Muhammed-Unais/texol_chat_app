@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:texol_chat_app/core/enums.dart';
 import 'package:texol_chat_app/core/theme/app_pallete.dart';
 import 'package:texol_chat_app/features/chat/model/charging_status_model.dart';
 import 'package:texol_chat_app/features/chat/model/message_model.dart';
@@ -45,38 +44,6 @@ class _ChatScreenState extends State<ChatScreen> {
       labelColor: Colors.yellow.shade800,
     ),
   ];
-
-  final List<Message> messages = [
-    Message(
-      text: "Hello!",
-      sender: "me",
-      timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
-      messageTyoe: MessageType.voice,
-      status: 'Unread',
-    ),
-    Message(
-      text: "How are you?",
-      sender: "me",
-      timestamp: DateTime.now().subtract(const Duration(minutes: 9)),
-      messageTyoe: MessageType.text,
-      status: 'Unread',
-    ),
-    Message(
-      text: "I'm good, thank you!",
-      sender: "other",
-      timestamp: DateTime.now().subtract(const Duration(minutes: 7)),
-      messageTyoe: MessageType.text,
-      status: 'Unread',
-    ),
-    Message(
-      text: "What about you?",
-      sender: "other",
-      timestamp: DateTime.now().subtract(const Duration(minutes: 6)),
-      messageTyoe: MessageType.text,
-      status: 'Unread',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,18 +98,24 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           _messageStatus(),
           Expanded(
-            child: ListView.builder(
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                return MessageBubble(message: message);
+            child: Selector<ChatViewModel, List<MessageModel>>(
+              selector: (p0, p1) => p1.filteredMessages,
+              builder: (context, messages, _) {
+                return ListView.builder(
+                  reverse: true,
+                  itemCount: messages.length,
+                  itemBuilder: (context, index) {
+                    final message = messages[index];
+                    return MessageBubble(message: message);
+                  },
+                );
               },
             ),
           ),
           const BottomChatInput(),
           const SizedBox(height: 5),
           Selector<ChatViewModel, (bool, bool)>(
-            selector: (p0, p1) => (p1.isTexting, p1.isVoiceRecording),
+            selector: (p0, p1) => (p1.isTexting, p1.isVoiceInitiated),
             builder: (context, value, _) {
               if (value.$1 || value.$2) {
                 return _messageSendingButtons();
@@ -161,61 +134,75 @@ class _ChatScreenState extends State<ChatScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: 10,
-            horizontal: 16,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.blue.withOpacity(.1),
-            borderRadius: BorderRadius.circular(22),
-          ),
-          child: const Row(
-            children: [
-              Icon(
-                Icons.send_outlined,
-                color: Colors.blue,
-                size: 18,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Send as chat',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+        GestureDetector(
+          onTap: () async {
+            final chatViewModel = context.read<ChatViewModel>();
+
+            if (chatViewModel.isVoiceInitiated) {
+              await chatViewModel.sendVoiceMesage();
+            } else if (chatViewModel.isTexting) {
+              chatViewModel.sendMessage();
+            }
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 10,
+              horizontal: 16,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(.1),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: const Row(
+              children: [
+                Icon(
+                  Icons.send_outlined,
                   color: Colors.blue,
+                  size: 18,
                 ),
-              )
-            ],
+                SizedBox(width: 8),
+                Text(
+                  'Send as chat',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.blue,
+                  ),
+                )
+              ],
+            ),
           ),
         ),
         const SizedBox(width: 10),
-        Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: 12,
-            horizontal: 16,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.green.withOpacity(.1),
-            borderRadius: BorderRadius.circular(22),
-          ),
-          child: const Row(
-            children: [
-              Icon(
-                Icons.blinds_closed,
-                color: Colors.green,
-                size: 18,
-              ),
-              SizedBox(width: 8),
-              Text(
-                'Send as chat',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+        GestureDetector(
+          onTap: () async {},
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: 16,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(.1),
+              borderRadius: BorderRadius.circular(22),
+            ),
+            child: const Row(
+              children: [
+                Icon(
+                  Icons.blinds_closed,
                   color: Colors.green,
+                  size: 18,
                 ),
-              )
-            ],
+                SizedBox(width: 8),
+                Text(
+                  'Send as order',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.green,
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ],
@@ -252,6 +239,8 @@ class _ChatScreenState extends State<ChatScreen> {
               setState(() {
                 currentTabIndex = index;
               });
+              final chatViewModel = context.read<ChatViewModel>();
+              chatViewModel.setFilter(tabs[index].status);
             },
             child: ChipTheme(
               data: ChipThemeData(
@@ -283,3 +272,40 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 }
+
+
+//  final List<MessageModel> messages = [
+//     MessageModel(
+//       id: "",
+//       content: "Hello!",
+//       sender: "me",
+//       timestamp: DateTime.now().subtract(const Duration(minutes: 10)),
+//       messageTyoe: MessageType.voice,
+//       status: 'Unread',
+//     ),
+//     MessageModel(
+//       id: "",
+//       content: "How are you?",
+//       sender: "me",
+//       timestamp: DateTime.now().subtract(const Duration(minutes: 9)),
+//       messageTyoe: MessageType.text,
+//       status: 'Unread',
+//     ),
+//     MessageModel(
+//       id: "",
+//       content: "I'm good, thank you!",
+//       sender: "other",
+//       timestamp: DateTime.now().subtract(const Duration(minutes: 7)),
+//       messageTyoe: MessageType.text,
+//       status: 'Unread',
+//     ),
+//     MessageModel(
+//       id: "",
+//       content: "What about you?",
+//       sender: "other",
+//       timestamp: DateTime.now().subtract(const Duration(minutes: 6)),
+//       messageTyoe: MessageType.text,
+//       status: 'Unread',
+//     ),
+//   ];
+
