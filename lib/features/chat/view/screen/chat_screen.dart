@@ -1,10 +1,12 @@
-import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:texol_chat_app/core/enums.dart';
 import 'package:texol_chat_app/core/theme/app_pallete.dart';
 import 'package:texol_chat_app/features/chat/model/charging_status_model.dart';
 import 'package:texol_chat_app/features/chat/model/message_model.dart';
+import 'package:texol_chat_app/features/chat/view/widget/bottom_chat_input.dart';
 import 'package:texol_chat_app/features/chat/view/widget/message_bubble.dart';
+import 'package:texol_chat_app/features/chat/view_model/chat_view_model.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -15,9 +17,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   int currentTabIndex = 0;
-  final TextEditingController _textController = TextEditingController();
-  bool isMessageNotEmpty = false;
-  bool voiceMessageInitited = false;
+
   final List<ChargingStatusModel> tabs = [
     ChargingStatusModel(
       status: "All",
@@ -76,12 +76,6 @@ class _ChatScreenState extends State<ChatScreen> {
       status: 'Unread',
     ),
   ];
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,293 +139,83 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          _bottomchatInputFiled(),
+          const BottomChatInput(),
           const SizedBox(height: 5),
-          if (isMessageNotEmpty || voiceMessageInitited) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(.1),
-                    borderRadius: BorderRadius.circular(22),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.send_outlined,
-                        color: Colors.blue,
-                        size: 18,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Send as chat',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.blue,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(.1),
-                    borderRadius: BorderRadius.circular(22),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(
-                        Icons.blinds_closed,
-                        color: Colors.green,
-                        size: 18,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Send as chat',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.green,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 5),
-          ],
+          Selector<ChatViewModel, (bool, bool)>(
+            selector: (p0, p1) => (p1.isTexting, p1.isVoiceRecording),
+            builder: (context, value, _) {
+              if (value.$1 || value.$2) {
+                return _messageSendingButtons();
+              }
+
+              return const SizedBox();
+            },
+          ),
+          const SizedBox(height: 5),
         ],
       ),
     );
   }
 
-  Padding _bottomchatInputFiled() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 0.8,
-              spreadRadius: 0.8,
-              offset: const Offset(
-                0,
-                0.5,
-              ),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.symmetric(
-          vertical: 8,
-          horizontal: 12,
-        ),
-        child: voiceMessageInitited
-            ? _voiceMessageControllers()
-            : _textInputField(),
-      ),
-    );
-  }
-
-  Row _textInputField() {
+  Row _messageSendingButtons() {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 10,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 0.5,
-                  spreadRadius: 0.1,
-                  offset: const Offset(
-                    0,
-                    0.5,
-                  ),
-                ),
-              ],
-            ),
-            child: Center(
-              child: Theme(
-                data: ThemeData(
-                  inputDecorationTheme: const InputDecorationTheme(
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(
-                      color: Colors.black45,
-                    ),
-                  ),
-                ),
-                child: TextField(
-                  onChanged: (value) {
-                    if (value.isEmpty) {
-                      isMessageNotEmpty = false;
-                    } else {
-                      isMessageNotEmpty = true;
-                    }
-
-                    setState(() {});
-                  },
-                  controller: _textController,
-                  decoration: const InputDecoration(
-                    hintText: 'Type here...',
-                    suffixIcon: Icon(Icons.file_present_outlined),
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 14,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: 10,
+            horizontal: 16,
           ),
-        ),
-        const SizedBox(width: 10),
-        GestureDetector(
-          onLongPress: () {
-            setState(() {
-              voiceMessageInitited = true;
-            });
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 18,
-            ),
-            decoration: const BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.all(
-                Radius.circular(20),
-              ),
-            ),
-            child: const Icon(
-              Icons.mic,
-              color: Colors.white,
-            ),
+          decoration: BoxDecoration(
+            color: Colors.blue.withOpacity(.1),
+            borderRadius: BorderRadius.circular(22),
           ),
-        ),
-      ],
-    );
-  }
-
-  Row _voiceMessageControllers() {
-    return Row(
-      children: [
-        GestureDetector(
-          onTap: () {},
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 18,
-            ),
-            decoration: const BoxDecoration(
-              color: Colors.blue,
-              borderRadius: BorderRadius.all(
-                Radius.circular(20),
-              ),
-            ),
-            child: const Icon(
-              Icons.keyboard,
-              color: Colors.white,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: const Row(
             children: [
-              AudioFileWaveforms(
-                size: const Size(double.infinity, 35),
-                playerController: PlayerController(),
-                playerWaveStyle: const PlayerWaveStyle(
-                  fixedWaveColor: Pallete.borderColor,
-                  liveWaveColor: Pallete.gradient2,
-                  spacing: 7,
-                  showSeekLine: false,
-                ),
+              Icon(
+                Icons.send_outlined,
+                color: Colors.blue,
+                size: 18,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    height: 6,
-                    width: 6,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    '01:25',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  )
-                ],
+              SizedBox(width: 8),
+              Text(
+                'Send as chat',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.blue,
+                ),
               )
             ],
           ),
         ),
-        GestureDetector(
-          onTap: () {},
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 18,
-            ),
-            decoration: const BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.all(
-                Radius.circular(20),
-              ),
-            ),
-            child: const Icon(
-              Icons.play_arrow,
-              color: Colors.white,
-            ),
+        const SizedBox(width: 10),
+        Container(
+          padding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 16,
           ),
-        ),
-        const SizedBox(width: 6),
-        GestureDetector(
-          onTap: () {
-            voiceMessageInitited = false;
-            setState(() {});
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              vertical: 12,
-              horizontal: 18,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.red.withOpacity(.07),
-              borderRadius: const BorderRadius.all(
-                Radius.circular(20),
+          decoration: BoxDecoration(
+            color: Colors.green.withOpacity(.1),
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: const Row(
+            children: [
+              Icon(
+                Icons.blinds_closed,
+                color: Colors.green,
+                size: 18,
               ),
-            ),
-            child: const Icon(
-              Icons.delete_outline_outlined,
-              color: Colors.red,
-            ),
+              SizedBox(width: 8),
+              Text(
+                'Send as chat',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.green,
+                ),
+              )
+            ],
           ),
         ),
       ],
