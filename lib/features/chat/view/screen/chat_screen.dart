@@ -1,3 +1,4 @@
+import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:texol_chat_app/core/enums.dart';
 import 'package:texol_chat_app/core/theme/app_pallete.dart';
@@ -16,6 +17,7 @@ class _ChatScreenState extends State<ChatScreen> {
   int currentTabIndex = 0;
   final TextEditingController _textController = TextEditingController();
   bool isMessageNotEmpty = false;
+  bool voiceMessageInitited = false;
   final List<ChargingStatusModel> tabs = [
     ChargingStatusModel(
       status: "All",
@@ -143,9 +145,9 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          _bottomChatField(),
-          if (isMessageNotEmpty) ...[
-            const SizedBox(height: 5),
+          _bottomchatInputFiled(),
+          const SizedBox(height: 5),
+          if (isMessageNotEmpty || voiceMessageInitited) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -215,7 +217,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Padding _bottomChatField() {
+  Padding _bottomchatInputFiled() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       child: Container(
@@ -238,85 +240,201 @@ class _ChatScreenState extends State<ChatScreen> {
           vertical: 8,
           horizontal: 12,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 0.5,
-                      spreadRadius: 0.1,
-                      offset: const Offset(
-                        0,
-                        0.5,
-                      ),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Theme(
-                    data: ThemeData(
-                      inputDecorationTheme: const InputDecorationTheme(
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(
-                          color: Colors.black45,
-                        ),
-                      ),
-                    ),
-                    child: TextField(
-                      onChanged: (value) {
-                        if (value.isEmpty) {
-                          isMessageNotEmpty = false;
-                        } else {
-                          isMessageNotEmpty = true;
-                        }
-
-                        setState(() {});
-                      },
-                      controller: _textController,
-                      decoration: const InputDecoration(
-                        hintText: 'Type here...',
-                        suffixIcon: Icon(Icons.file_present_outlined),
-                        contentPadding: EdgeInsets.symmetric(
-                          vertical: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            GestureDetector(
-              onTap: () {},
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 18,
-                ),
-                decoration: const BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(20),
-                  ),
-                ),
-                child: const Icon(
-                  Icons.mic,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
-        ),
+        child: voiceMessageInitited
+            ? _voiceMessageControllers()
+            : _textInputField(),
       ),
+    );
+  }
+
+  Row _textInputField() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 0.5,
+                  spreadRadius: 0.1,
+                  offset: const Offset(
+                    0,
+                    0.5,
+                  ),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Theme(
+                data: ThemeData(
+                  inputDecorationTheme: const InputDecorationTheme(
+                    border: InputBorder.none,
+                    hintStyle: TextStyle(
+                      color: Colors.black45,
+                    ),
+                  ),
+                ),
+                child: TextField(
+                  onChanged: (value) {
+                    if (value.isEmpty) {
+                      isMessageNotEmpty = false;
+                    } else {
+                      isMessageNotEmpty = true;
+                    }
+
+                    setState(() {});
+                  },
+                  controller: _textController,
+                  decoration: const InputDecoration(
+                    hintText: 'Type here...',
+                    suffixIcon: Icon(Icons.file_present_outlined),
+                    contentPadding: EdgeInsets.symmetric(
+                      vertical: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        GestureDetector(
+          onLongPress: () {
+            setState(() {
+              voiceMessageInitited = true;
+            });
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: 18,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.all(
+                Radius.circular(20),
+              ),
+            ),
+            child: const Icon(
+              Icons.mic,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Row _voiceMessageControllers() {
+    return Row(
+      children: [
+        GestureDetector(
+          onTap: () {},
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: 18,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.all(
+                Radius.circular(20),
+              ),
+            ),
+            child: const Icon(
+              Icons.keyboard,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AudioFileWaveforms(
+                size: const Size(double.infinity, 35),
+                playerController: PlayerController(),
+                playerWaveStyle: const PlayerWaveStyle(
+                  fixedWaveColor: Pallete.borderColor,
+                  liveWaveColor: Pallete.gradient2,
+                  spacing: 7,
+                  showSeekLine: false,
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 6,
+                    width: 6,
+                    decoration: const BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    '01:25',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                ],
+              )
+            ],
+          ),
+        ),
+        GestureDetector(
+          onTap: () {},
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: 18,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.all(
+                Radius.circular(20),
+              ),
+            ),
+            child: const Icon(
+              Icons.play_arrow,
+              color: Colors.white,
+            ),
+          ),
+        ),
+        const SizedBox(width: 6),
+        GestureDetector(
+          onTap: () {
+            voiceMessageInitited = false;
+            setState(() {});
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              vertical: 12,
+              horizontal: 18,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(.07),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(20),
+              ),
+            ),
+            child: const Icon(
+              Icons.delete_outline_outlined,
+              color: Colors.red,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
