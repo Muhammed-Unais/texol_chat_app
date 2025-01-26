@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:texol_chat_app/core/provider/audio_player_provider.dart';
 import 'package:texol_chat_app/core/theme/app_pallete.dart';
+import 'package:texol_chat_app/features/chat/view/widget/order_list_message_card.dart';
 
 class VoiceMessageCard extends StatefulWidget {
   final String sender;
@@ -9,6 +10,7 @@ class VoiceMessageCard extends StatefulWidget {
   final DateTime timestamp;
   final String content;
   final String duration;
+  final bool isOrder;
 
   const VoiceMessageCard({
     super.key,
@@ -17,6 +19,7 @@ class VoiceMessageCard extends StatefulWidget {
     this.isRead = false,
     required this.content,
     required this.duration,
+    this.isOrder = false,
   });
 
   @override
@@ -56,7 +59,7 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
             maxWidth: MediaQuery.of(context).size.width * 0.7,
           ),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 184, 218, 245),
+            color: Colors.white,
             borderRadius: BorderRadius.only(
               topLeft: isSender ? const Radius.circular(18) : Radius.zero,
               topRight: const Radius.circular(18),
@@ -71,90 +74,101 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
               ),
             ],
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
+          child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: const BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
-                  color: Pallete.whiteColor,
-                ),
-                child: GestureDetector(
-                  onTap: () async {
-                    await audioProvider.play(widget.content);
-                  },
-                  child: Icon(
-                    isPlaying ? Icons.pause : Icons.play_arrow,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SliderTheme(
-                        data: SliderTheme.of(context).copyWith(
-                          activeTrackColor: Pallete.whiteColor,
-                          inactiveTrackColor:
-                              Pallete.whiteColor.withOpacity(.4),
-                          thumbColor: Colors.blue,
-                          trackHeight: 4,
-                          overlayShape: SliderComponentShape.noOverlay,
-                          minThumbSeparation: 1,
-                          thumbShape: const RoundSliderThumbShape(
-                            enabledThumbRadius: 8.0,
-                          ),
-                        ),
-                        child: Slider(
-                          value: progress,
-                          min: 0.0,
-                          onChanged: isCurrent
-                              ? (value) {
-                                  final position = Duration(
-                                      milliseconds:
-                                          (value * totalDuration.inMilliseconds)
-                                              .toInt());
-                                  audioProvider.seek(position);
-                                }
-                              : null,
-                          onChangeEnd: (value) {},
-                        ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                      color: Colors.black12,
+                    ),
+                    child: GestureDetector(
+                      onTap: () async {
+                        await audioProvider.play(widget.content);
+                      },
+                      child: Icon(
+                        isPlaying ? Icons.pause : Icons.play_arrow,
                       ),
-                      const SizedBox(height: 5),
-                      Row(
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            isPlaying
-                                ? "${_formatDuration(currentPosition)} / ${_formatDuration(totalDuration)}"
-                                : widget.duration,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
+                          SliderTheme(
+                            data: SliderTheme.of(context).copyWith(
+                              activeTrackColor: Pallete.whiteColor,
+                              inactiveTrackColor:
+                                  Pallete.whiteColor.withOpacity(.4),
+                              thumbColor: Colors.blue,
+                              trackHeight: 4,
+                              overlayShape: SliderComponentShape.noOverlay,
+                              minThumbSeparation: 1,
+                              thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 8.0,
+                              ),
+                            ),
+                            child: Slider(
+                              value: progress,
+                              min: 0.0,
+                              onChanged: isCurrent
+                                  ? (value) {
+                                      final position = Duration(
+                                          milliseconds: (value *
+                                                  totalDuration.inMilliseconds)
+                                              .toInt());
+                                      audioProvider.seek(position);
+                                    }
+                                  : null,
+                              onChangeEnd: (value) {},
                             ),
                           ),
-                          const Expanded(child: SizedBox()),
-                          Text(
-                            "${widget.timestamp.hour}:${widget.timestamp.minute.toString().padLeft(2, '0')}",
-                            style: const TextStyle(
-                                fontSize: 14, color: Colors.grey),
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Text(
+                                isPlaying
+                                    ? "${_formatDuration(currentPosition)} / ${_formatDuration(totalDuration)}"
+                                    : widget.duration,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              const Expanded(child: SizedBox()),
+                              widget.isOrder
+                                  ? const SizedBox()
+                                  : Text(
+                                      "${widget.timestamp.hour}:${widget.timestamp.minute.toString().padLeft(2, '0')}",
+                                      style: const TextStyle(
+                                          fontSize: 14, color: Colors.grey),
+                                    ),
+                              if (isSender && !widget.isOrder) ...[
+                                const SizedBox(width: 5),
+                                const Icon(
+                                  Icons.done_all_outlined,
+                                  size: 12,
+                                  color: Colors.grey,
+                                ),
+                              ]
+                            ],
                           ),
-                          if (isSender) ...[
-                            const SizedBox(width: 5),
-                            const Icon(
-                              Icons.done_all_outlined,
-                              size: 12,
-                              color: Colors.grey,
-                            ),
-                          ]
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
+              if (widget.isOrder)
+                OrderMessageCard(
+                  isSender: isSender,
+                  timestamp: widget.timestamp,
+                )
             ],
           ),
         ),

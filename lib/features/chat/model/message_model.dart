@@ -9,6 +9,7 @@ class MessageModel {
   final String content;
   final String? duration;
   final String? fileName;
+  final bool asOrder;
 
   MessageModel({
     required this.id,
@@ -19,6 +20,7 @@ class MessageModel {
     required this.content,
     this.fileName,
     this.duration,
+    this.asOrder = false,
   });
   @override
   String toString() {

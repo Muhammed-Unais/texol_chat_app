@@ -13,7 +13,8 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (message.messageTyoe == MessageType.text) {
-      return MessageCard(
+      return TextMessageCard(
+        asOrder: message.asOrder,
         text: message.content,
         sender: message.sender,
         timestamp: message.timestamp,
@@ -31,6 +32,7 @@ class MessageBubble extends StatelessWidget {
       timestamp: message.timestamp,
       content: message.content,
       duration: message.duration ?? '',
+      isOrder: message.asOrder,
     );
   }
 

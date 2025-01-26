@@ -87,6 +87,7 @@ class ChatViewModel extends ChangeNotifier {
 
   void sendMessage({bool asOrder = false}) {
     final newMessage = MessageModel(
+      asOrder: asOrder,
       sender: 'me',
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       content: _textController.text,
@@ -101,7 +102,7 @@ class ChatViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendVoiceMesage() async {
+  Future<void> sendVoiceMesage({bool asOrder = false}) async {
     final path = await _recorderController.stop();
 
     log("$path");
@@ -109,6 +110,7 @@ class ChatViewModel extends ChangeNotifier {
     setVoiceRecordInitiatedStatus(false);
     setVoiceRecordingStatus(_recorderController.isRecording);
     final voiceMessage = MessageModel(
+      asOrder: asOrder,
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       content: path ?? '',
       messageTyoe: MessageType.voice,
@@ -163,9 +165,10 @@ class ChatViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void sendFile() async {
+  void sendFile({bool asOrder = false}) async {
     if (_filePath == null) return;
     final fileMessage = MessageModel(
+      asOrder: asOrder,
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       content: _filePath!,
       messageTyoe: fileType!,

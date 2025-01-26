@@ -178,7 +178,17 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         const SizedBox(width: 10),
         GestureDetector(
-          onTap: () async {},
+          onTap: () async {
+            final chatViewModel = context.read<ChatViewModel>();
+
+            if (chatViewModel.isVoiceInitiated) {
+              await chatViewModel.sendVoiceMesage(asOrder: true);
+            } else if (chatViewModel.isTexting) {
+              chatViewModel.sendMessage(asOrder: true);
+            } else if (chatViewModel.filePath != null) {
+              chatViewModel.sendFile(asOrder: true);
+            }
+          },
           child: Container(
             padding: const EdgeInsets.symmetric(
               vertical: 12,

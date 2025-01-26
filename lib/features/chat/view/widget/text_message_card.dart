@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:texol_chat_app/features/chat/view/widget/order_list_message_card.dart';
 
-class MessageCard extends StatelessWidget {
+class TextMessageCard extends StatelessWidget {
   final String text;
   final String sender;
   final DateTime timestamp;
+  final bool asOrder;
 
-  const MessageCard({
+  const TextMessageCard({
     super.key,
     required this.text,
     required this.sender,
     required this.timestamp,
+    required this.asOrder,
   });
 
   @override
@@ -41,28 +44,40 @@ class MessageCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.end,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Flexible(
-              child: Text(
-                text,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Flexible(
+                  child: Text(
+                    text,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 5),
+                asOrder
+                    ? const SizedBox()
+                    : Text(
+                        "${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+              ],
             ),
-            const SizedBox(width: 5),
-            Text(
-              "${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}",
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
-            ),
+            if (asOrder)
+              OrderMessageCard(
+                isSender: isSender,
+                timestamp: timestamp,
+              )
           ],
         ),
       ),
