@@ -102,7 +102,7 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
                         children: [
                           SliderTheme(
                             data: SliderTheme.of(context).copyWith(
-                              activeTrackColor: Pallete.whiteColor,
+                              activeTrackColor: Colors.black38,
                               inactiveTrackColor:
                                   Pallete.whiteColor.withOpacity(.4),
                               thumbColor: Colors.blue,

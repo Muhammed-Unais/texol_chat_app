@@ -121,7 +121,7 @@ class _BottomChatInputState extends State<BottomChatInput> {
         ),
         const SizedBox(width: 10),
         GestureDetector(
-          onLongPress: _chatViewModel.startOrDeleteRecording,
+          onTap: _chatViewModel.startOrDeleteRecording,
           child: Container(
             padding: const EdgeInsets.symmetric(
               vertical: 12,
