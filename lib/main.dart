@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:texol_chat_app/core/provider/audio_player_provider.dart';
 import 'package:texol_chat_app/core/theme/app_theme.dart';
 import 'package:texol_chat_app/features/auth/view/screens/login_screen.dart';
 import 'package:texol_chat_app/features/auth/view_model/auth_view_model.dart';
@@ -17,6 +18,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => ChatViewModel(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AudioPlayerProvider(),
         )
       ],
       child: const MyApp(),

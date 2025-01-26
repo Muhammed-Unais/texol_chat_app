@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
@@ -95,6 +96,8 @@ class ChatViewModel extends ChangeNotifier {
 
   Future<void> sendVoiceMesage() async {
     final path = await _recorderController.stop();
+
+    log("$path");
     // after sending message bottom field ui change is needed
     setVoiceRecordInitiatedStatus(false);
     setVoiceRecordingStatus(_recorderController.isRecording);
@@ -105,9 +108,19 @@ class ChatViewModel extends ChangeNotifier {
       status: 'Unread',
       timestamp: DateTime.now(),
       sender: "me",
+      duration: _formatDuration(
+        _recorderController.recordedDuration,
+      ),
     );
     _messages = [voiceMessage, ..._messages];
     notifyListeners();
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
   }
 
   void disposeViewModel() {

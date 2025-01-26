@@ -7,13 +7,41 @@ class MessageModel {
   final MessageType messageTyoe;
   final String status;
   final String content;
+  final String? duration;
 
   MessageModel({
+    required this.id,
     required this.sender,
     required this.timestamp,
     required this.messageTyoe,
     required this.status,
-    required this.id,
     required this.content,
+    this.duration,
   });
+  @override
+  String toString() {
+    return 'MessageModel(id: $id, sender: $sender, timestamp: $timestamp, messageTyoe: $messageTyoe, status: $status, content: $content)';
+  }
+
+  @override
+  bool operator ==(covariant MessageModel other) {
+    if (identical(this, other)) return true;
+
+    return other.id == id &&
+        other.sender == sender &&
+        other.timestamp == timestamp &&
+        other.messageTyoe == messageTyoe &&
+        other.status == status &&
+        other.content == content;
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        sender.hashCode ^
+        timestamp.hashCode ^
+        messageTyoe.hashCode ^
+        status.hashCode ^
+        content.hashCode;
+  }
 }

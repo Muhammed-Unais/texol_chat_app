@@ -17,17 +17,18 @@ class MessageBubble extends StatelessWidget {
         timestamp: message.timestamp,
       );
     } else if (message.messageTyoe == MessageType.voice) {
-      return _buildVoiceBubble(message);
+      return _buildVoiceBubble();
     } else {
       return _buildFileBubble(message);
     }
   }
 
-  Widget _buildVoiceBubble(MessageModel msg) {
+  Widget _buildVoiceBubble() {
     return VoiceMessageCard(
       sender: message.sender,
-      duration: "0.0",
       timestamp: message.timestamp,
+      content: message.content,
+      duration: message.duration ?? '',
     );
   }
 
