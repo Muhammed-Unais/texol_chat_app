@@ -18,7 +18,6 @@ class _BottomChatInputState extends State<BottomChatInput> {
   void initState() {
     super.initState();
     _chatViewModel = context.read<ChatViewModel>();
-    _chatViewModel.init();
   }
 
   @override
@@ -29,35 +28,38 @@ class _BottomChatInputState extends State<BottomChatInput> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 0.8,
-              spreadRadius: 0.8,
-              offset: const Offset(
-                0,
-                0.5,
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 0.8,
+                spreadRadius: 0.8,
+                offset: const Offset(
+                  0,
+                  0.5,
+                ),
               ),
-            ),
-          ],
-        ),
-        padding: const EdgeInsets.symmetric(
-          vertical: 8,
-          horizontal: 12,
-        ),
-        child: Selector<ChatViewModel, (bool, String?, MessageType?)>(
-          selector: (p0, p1) => (p1.isVoiceInitiated, p1.fileName, p1.fileType),
-          builder: (context, values, _) {
-            if (values.$1) return _voiceMessageControllers();
-            if (values.$2 != null) return _fileField(values.$2, values.$3);
-            return _textInputField();
-          },
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 12,
+          ),
+          child: Selector<ChatViewModel, (bool, String?, MessageType?)>(
+            selector: (p0, p1) =>
+                (p1.isVoiceInitiated, p1.fileName, p1.fileType),
+            builder: (context, values, _) {
+              if (values.$1) return _voiceMessageControllers();
+              if (values.$2 != null) return _fileField(values.$2, values.$3);
+              return _textInputField();
+            },
+          ),
         ),
       ),
     );

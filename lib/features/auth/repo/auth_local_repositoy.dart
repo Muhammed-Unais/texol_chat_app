@@ -15,7 +15,10 @@ class AuthLocalRepositoy {
     await _sharedPreferences.setBool('isLoggedIn', true);
   }
 
-  bool getData() {
-    return _sharedPreferences.getBool('isLoggedIn') ?? false;
+  (bool, String) getData() {
+    return (
+      _sharedPreferences.getBool('isLoggedIn') ?? false,
+      _sharedPreferences.getString('userName') ?? ''
+    );
   }
 }

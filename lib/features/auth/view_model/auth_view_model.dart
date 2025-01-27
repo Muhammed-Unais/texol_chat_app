@@ -7,6 +7,7 @@ class AuthViewModel extends ChangeNotifier {
   bool isLoading = false;
   String errorMessage = '';
   bool _isLoggedIn = false;
+  String? userName;
 
   bool get isLoggedIn => _isLoggedIn;
 
@@ -23,6 +24,8 @@ class AuthViewModel extends ChangeNotifier {
     try {
       setLoading(true);
       await _authLocalRepositoy.setData(userName: username, password: password);
+      _isLoggedIn = true;
+      userName = username;
     } catch (e) {
       errorMessage = 'Something went wrong.';
     } finally {
@@ -31,7 +34,8 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> autoLoginCheck() async {
-    _isLoggedIn = _authLocalRepositoy.getData();
+    _isLoggedIn = _authLocalRepositoy.getData().$1;
+    userName = _authLocalRepositoy.getData().$2;
     notifyListeners();
   }
 }

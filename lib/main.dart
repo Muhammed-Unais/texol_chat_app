@@ -9,12 +9,14 @@ import 'package:texol_chat_app/features/chat/view_model/chat_view_model.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final authViewModel = AuthViewModel();
+  await authViewModel.initLocal();
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => AuthViewModel(),
+          create: (_) => authViewModel,
         ),
         ChangeNotifierProvider(
           create: (_) => ChatViewModel(),
@@ -40,7 +42,11 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     final authViewModel = context.read<AuthViewModel>();
-    authViewModel.initLocal().then((value) => authViewModel.autoLoginCheck());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) {
+        authViewModel.autoLoginCheck();
+      },
+    );
   }
 
   @override

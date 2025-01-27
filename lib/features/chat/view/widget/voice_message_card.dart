@@ -37,6 +37,8 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
   @override
   Widget build(BuildContext context) {
     bool isSender = widget.sender == 'me';
+    String formattedTime =
+        "${widget.timestamp.hour % 12 == 0 ? 12 : widget.timestamp.hour % 12}.${widget.timestamp.minute.toString().padLeft(2, '0')}";
 
     return Consumer<AudioPlayerProvider>(builder: (context, audioProvider, _) {
       bool isCurrent = audioProvider.currentPlayingPath == widget.content;
@@ -144,7 +146,7 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
                               widget.isOrder
                                   ? const SizedBox()
                                   : Text(
-                                      "${widget.timestamp.hour}:${widget.timestamp.minute.toString().padLeft(2, '0')}",
+                                      formattedTime,
                                       style: const TextStyle(
                                           fontSize: 14, color: Colors.grey),
                                     ),

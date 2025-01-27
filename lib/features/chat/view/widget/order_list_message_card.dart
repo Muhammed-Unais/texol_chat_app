@@ -17,9 +17,11 @@ class OrderMessageCard extends StatefulWidget {
 class OrderMessageCardState extends State<OrderMessageCard> {
   @override
   Widget build(BuildContext context) {
+    String formattedTime =
+        "${widget.timestamp.hour % 12 == 0 ? 12 : widget.timestamp.hour % 12}.${widget.timestamp.minute.toString().padLeft(2, '0')}";
     return Theme(
       data: Theme.of(context).copyWith(
-        dividerColor: Colors.transparent, // Remove borders
+        dividerColor: Colors.transparent,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,7 +122,7 @@ class OrderMessageCardState extends State<OrderMessageCard> {
               const Expanded(child: SizedBox()),
               if (widget.isSender) ...[
                 Text(
-                  "${widget.timestamp.hour}:${widget.timestamp.minute.toString().padLeft(2, '0')}",
+                  formattedTime,
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(width: 5),

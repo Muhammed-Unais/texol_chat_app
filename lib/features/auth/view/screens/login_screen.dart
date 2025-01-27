@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:texol_chat_app/core/theme/app_pallete.dart';
@@ -77,14 +79,19 @@ class LoginScreenState extends State<LoginScreen> {
                                 _passwordController.text.trim(),
                               );
 
+                              log(authViewModel.isLoggedIn.toString());
+                              log(context.mounted.toString());
                               if (authViewModel.isLoggedIn && context.mounted) {
                                 _passwordController.clear();
                                 _usernameController.clear();
-                                Navigator.push(context, MaterialPageRoute(
-                                  builder: (context) {
-                                    return const ChatScreen();
-                                  },
-                                ));
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) {
+                                      return const ChatScreen();
+                                    },
+                                  ),
+                                );
                               }
                             },
                       style: ElevatedButton.styleFrom(

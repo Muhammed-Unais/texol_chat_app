@@ -18,6 +18,9 @@ class TextMessageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isSender = sender == 'me';
+    String formattedTime =
+        "${timestamp.hour % 12 == 0 ? 12 : timestamp.hour % 12}.${timestamp.minute.toString().padLeft(2, '0')}";
+
     return Align(
       alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
@@ -65,7 +68,7 @@ class TextMessageCard extends StatelessWidget {
                 asOrder
                     ? const SizedBox()
                     : Text(
-                        "${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}",
+                        formattedTime,
                         style: const TextStyle(
                           fontSize: 12,
                           color: Colors.grey,
