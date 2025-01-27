@@ -152,7 +152,7 @@ class _BottomChatInputState extends State<BottomChatInput> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        GestureDetector(
+        InkWell(
           onTap: _chatViewModel.filePick,
           child: Container(
             padding: const EdgeInsets.symmetric(

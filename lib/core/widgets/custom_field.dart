@@ -6,6 +6,9 @@ class CustomField extends StatelessWidget {
   final bool isObscureText;
   final bool readOnly;
   final VoidCallback? onTap;
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+
   const CustomField({
     super.key,
     required this.hintText,
@@ -13,23 +16,21 @@ class CustomField extends StatelessWidget {
     this.isObscureText = false,
     this.readOnly = false,
     this.onTap,
+    this.validator,
+    this.onChanged,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      onChanged: onChanged,
       onTap: onTap,
       readOnly: readOnly,
       controller: controller,
       decoration: InputDecoration(
         hintText: hintText,
       ),
-      validator: (val) {
-        if (val!.trim().isEmpty) {
-          return "$hintText is missing!";
-        }
-        return null;
-      },
+      validator: validator,
       obscureText: isObscureText,
     );
   }

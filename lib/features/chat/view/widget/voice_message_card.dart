@@ -43,8 +43,6 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
 
     return Consumer<AudioPlayerProvider>(builder: (context, audioProvider, _) {
       bool isCurrent = audioProvider.currentPlayingPath == widget.content;
-
-      log(isCurrent.toString());
       bool isPlaying = isCurrent && audioProvider.isPlaying;
 
       Duration currentPosition =
@@ -185,66 +183,3 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
     });
   }
 }
-
-
-// AudioPlayer? _audioPlayer;
-//   bool _isPlaying = false;
-//   Duration _duration = Duration.zero;
-//   Duration _position = Duration.zero;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _initAudio();
-//   }
-
-//   Future<void> _initAudio() async {
-//     _audioPlayer?.stop();
-//     _audioPlayer?.dispose();
-//     _audioPlayer = AudioPlayer();
-//     try {
-//       await _audioPlayer?.setFilePath(widget.content);
-//       _duration = _audioPlayer?.duration ?? Duration.zero;
-
-//       _audioPlayer?.positionStream.listen((pos) {
-//         setState(() {
-//           _position = pos;
-//         });
-//       });
-
-//       _audioPlayer?.playerStateStream.listen((state) {
-//         setState(() {
-//           _isPlaying = state.playing;
-//           if (state.processingState == ProcessingState.completed) {
-//             _isPlaying = false;
-//             _audioPlayer?.seek(Duration.zero);
-//             _audioPlayer?.pause();
-//           }
-//         });
-//       });
-//     } catch (e) {
-//       log("$e");
-//     }
-//   }
-
-//   void _togglePlayPause() {
-//     if (_isPlaying) {
-//       log(widget.content);
-//       _audioPlayer?.pause();
-//     } else {
-//       _audioPlayer?.play();
-//     }
-//   }
-
-//   String _formatDuration(Duration duration) {
-//     String twoDigits(int n) => n.toString().padLeft(2, '0');
-//     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-//     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-//     return "$twoDigitMinutes:$twoDigitSeconds";
-//   }
-
-//   @override
-//   void dispose() {
-//     _audioPlayer?.dispose();
-//     super.dispose();
-//   }
