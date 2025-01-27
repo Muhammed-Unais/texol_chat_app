@@ -30,9 +30,7 @@ class TextMessageCard extends StatelessWidget {
           maxWidth: MediaQuery.of(context).size.width * 0.7,
         ),
         decoration: BoxDecoration(
-          color: isSender
-              ? Colors.white
-              : const Color.fromARGB(255, 184, 218, 245),
+          color: Colors.lightBlue[50],
           borderRadius: BorderRadius.only(
             topLeft: isSender ? const Radius.circular(12) : Radius.zero,
             topRight: const Radius.circular(12),

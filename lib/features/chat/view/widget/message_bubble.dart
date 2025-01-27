@@ -39,6 +39,8 @@ class MessageBubble extends StatelessWidget {
   Widget _buildFileBubble() {
     if (message.messageTyoe == MessageType.image) {
       return ImageMessageCard(
+        timestamp: message.timestamp,
+        asOrder: message.asOrder,
         imagePath: message.content,
         sender: message.sender,
       );
@@ -47,6 +49,8 @@ class MessageBubble extends StatelessWidget {
       filePath: message.content,
       fileName: message.fileName ?? '',
       sender: message.sender,
+      asOrder: message.asOrder,
+      timestamp: message.timestamp,
     );
   }
 }

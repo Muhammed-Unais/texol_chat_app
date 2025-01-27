@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:texol_chat_app/core/provider/audio_player_provider.dart';
@@ -42,6 +43,8 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
 
     return Consumer<AudioPlayerProvider>(builder: (context, audioProvider, _) {
       bool isCurrent = audioProvider.currentPlayingPath == widget.content;
+
+      log(isCurrent.toString());
       bool isPlaying = isCurrent && audioProvider.isPlaying;
 
       Duration currentPosition =
@@ -61,7 +64,7 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
             maxWidth: MediaQuery.of(context).size.width * 0.7,
           ),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: widget.isOrder ? Colors.white : Colors.lightBlue[50],
             borderRadius: BorderRadius.only(
               topLeft: isSender ? const Radius.circular(18) : Radius.zero,
               topRight: const Radius.circular(18),
@@ -83,9 +86,9 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                      color: Colors.black12,
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(Radius.circular(12)),
+                      color: widget.isOrder ? Colors.black12 : Colors.white,
                     ),
                     child: GestureDetector(
                       onTap: () async {
@@ -104,10 +107,13 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
                         children: [
                           SliderTheme(
                             data: SliderTheme.of(context).copyWith(
-                              activeTrackColor: Colors.black38,
+                              activeTrackColor: widget.isOrder
+                                  ? Colors.black38
+                                  : Colors.white,
                               inactiveTrackColor:
                                   Pallete.whiteColor.withOpacity(.4),
                               thumbColor: Colors.blue,
+                              disabledThumbColor: Colors.blue,
                               trackHeight: 4,
                               overlayShape: SliderComponentShape.noOverlay,
                               minThumbSeparation: 1,
@@ -117,9 +123,9 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
                             ),
                             child: Slider(
                               value: progress,
-                              min: 0.0,
                               onChanged: isCurrent
                                   ? (value) {
+                                      log("Onchanged");
                                       final position = Duration(
                                           milliseconds: (value *
                                                   totalDuration.inMilliseconds)
@@ -127,7 +133,6 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
                                       audioProvider.seek(position);
                                     }
                                   : null,
-                              onChangeEnd: (value) {},
                             ),
                           ),
                           const SizedBox(height: 5),
@@ -148,7 +153,9 @@ class _VoiceMessageCardState extends State<VoiceMessageCard> {
                                   : Text(
                                       formattedTime,
                                       style: const TextStyle(
-                                          fontSize: 14, color: Colors.grey),
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                      ),
                                     ),
                               if (isSender && !widget.isOrder) ...[
                                 const SizedBox(width: 5),
